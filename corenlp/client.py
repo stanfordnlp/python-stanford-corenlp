@@ -4,6 +4,7 @@ Python CoreNLP: a server based interface to Java CoreNLP.
 import io
 import os
 import logging
+import json
 import shlex
 import subprocess
 import time
@@ -121,7 +122,7 @@ class CoreNLPClient(RobustService):
             assert host == "localhost", "If starting a server, endpoint must be localhost"
 
             assert os.getenv("JAVANLP_HOME") is not None, "Please define $JAVANLP_HOME where your CoreNLP Java checkout is"
-            start_cmd = "{javanlp}/bin/javanlp.sh edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port {port} -timeout {timeout}".format(
+            start_cmd = "{javanlp}/javanlp.sh edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port {port} -timeout {timeout}".format(
                 javanlp=os.getenv("JAVANLP_HOME"),
                 port=port,
                 timeout=timeout)
@@ -199,5 +200,51 @@ class CoreNLPClient(RobustService):
         doc = Document()
         parseFromDelimitedString(doc, r.content)
         return doc
+
+    def tokensregex(self, text, pattern, filter=False):
+        return self.__regex('/tokensregex', text, pattern, filter)
+
+    def semgrex(self, text, pattern, filter=False, unique=False, to_words=False):
+        matches = self.__regex('/semgrex', text, pattern, filter, unique)
+        if not to_words:
+            return matches
+        return self.semgrex_matches_to_indexed_words(matches)
+
+    def tregrex(self, text, pattern, filter=False):
+        return self.__regex('/tregex', text, pattern, filter)
+
+    def __regex(self, path, text, pattern, filter, unique=False):
+        """Send a regex-related request to the CoreNLP server.
+
+        :param (str | unicode) path: the path for the regex endpoint
+        :param text: raw text for the CoreNLPServer to apply the regex
+        :param (str | unicode) pattern: regex pattern
+        :param (bool) filter: option to filter sentences that contain matches, if false returns matches
+        :return: request result
+        """
+        r = requests.get(
+            self.endpoint + path, params={
+                'pattern': pattern,
+                'filter': filter,
+                'unique': unique
+            }, data=text)
+        output = r.text
+        try:
+            output = json.loads(r.text)
+        except:
+            pass
+        return output
+
+    @staticmethod
+    def semgrex_matches_to_indexed_words(matches):
+        """Transforms semgrex matches to indexed words.
+
+        :param matches: unprocessed matches from semgrex function
+        :return: flat array of indexed words
+        """
+        words = [dict(v, **dict([('sent', i)]))
+                 for i, s in enumerate(matches['sentences'])
+                 for k, v in s.items() if k != 'length']
+        return words
 
 __all__ = ["CoreNLPClient", "AnnotationException", "TimeoutException", "to_text"]
