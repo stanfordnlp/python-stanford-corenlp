@@ -204,13 +204,13 @@ class CoreNLPClient(RobustService):
     def tokensregex(self, text, pattern, filter=False):
         return self.__regex('/tokensregex', text, pattern, filter)
 
-    def semgrex(self, text, pattern, filter=False):
-        return self.__regex('/semgrex', text, pattern, filter)
+    def semgrex(self, text, pattern, filter=False, unique=False, to_words=False):
+         return __regex('/semgrex', text, pattern, filter, unique)
 
     def tregrex(self, text, pattern, filter=False):
         return self.__regex('/tregex', text, pattern, filter)
 
-    def __regex(self, path, text, pattern, filter):
+    def __regex(self, path, text, pattern, filter, unique=False):
         """Send a regex-related request to the CoreNLP server.
 
         :param (str | unicode) path: the path for the regex endpoint
@@ -222,7 +222,8 @@ class CoreNLPClient(RobustService):
         r = requests.get(
             self.endpoint + path, params={
                 'pattern': pattern,
-                'filter': filter
+                'filter': filter,
+                'unique': unique
             }, data=text)
         output = r.text
         try:
