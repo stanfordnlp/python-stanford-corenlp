@@ -205,7 +205,10 @@ class CoreNLPClient(RobustService):
         return self.__regex('/tokensregex', text, pattern, filter)
 
     def semgrex(self, text, pattern, filter=False, unique=False, to_words=False):
-         return __regex('/semgrex', text, pattern, filter, unique)
+        matches = self.__regex('/semgrex', text, pattern, filter, unique)
+        if not to_words:
+            return matches
+        return self.semgrex_matches_to_indexed_words(matches)
 
     def tregrex(self, text, pattern, filter=False):
         return self.__regex('/tregex', text, pattern, filter)
@@ -231,5 +234,17 @@ class CoreNLPClient(RobustService):
         except:
             pass
         return output
+
+    @staticmethod
+    def semgrex_matches_to_indexed_words(matches):
+        """Transforms semgrex matches to indexed words.
+
+        :param matches: unprocessed matches from semgrex function
+        :return: flat array of indexed words
+        """
+        words = [dict(v, **dict([('sent', i)]))
+                 for i, s in enumerate(matches['sentences'])
+                 for k, v in s.items() if k != 'length']
+        return words
 
 __all__ = ["CoreNLPClient", "AnnotationException", "TimeoutException", "to_text"]
