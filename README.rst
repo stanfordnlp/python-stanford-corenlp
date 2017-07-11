@@ -19,7 +19,7 @@ Annotation Server Usage
 
 .. code-block:: python
 
-  from corenlp import CoreNLPClient
+  import corenlp
 
   text = "Chris wrote a simple sentence that he parsed with Stanford CoreNLP."
 
