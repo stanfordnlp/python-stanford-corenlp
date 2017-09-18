@@ -120,9 +120,7 @@ class CoreNLPClient(RobustService):
             host, port = urlparse(endpoint).netloc.split(":")
             assert host == "localhost", "If starting a server, endpoint must be localhost"
 
-            assert os.getenv("JAVANLP_HOME") is not None, "Please define $JAVANLP_HOME where your CoreNLP Java checkout is"
-            start_cmd = "{javanlp}/bin/javanlp.sh edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port {port} -timeout {timeout}".format(
-                javanlp=os.getenv("JAVANLP_HOME"),
+            start_cmd = "java edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port {port} -timeout {timeout}".format(
                 port=port,
                 timeout=timeout)
             stop_cmd = None
