@@ -32,7 +32,7 @@ Annotation Server Usage
   # variable $CORENLP_HOME that points to the unzipped directory.
   # The code below will launch StanfordCoreNLPServer in the background
   # and communicate with the server to annotate the sentence.
-  with corenlp.CoreNLPClient(annotators="tokenize ssplit".split()) as client:
+  with CoreNLPClient(annotators="tokenize ssplit".split()) as client:
     ann = client.annotate(text)
 
   # You can access annotations using ann.
