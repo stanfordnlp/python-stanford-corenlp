@@ -169,7 +169,7 @@ class CoreNLPClient(RobustService):
         self.default_properties = properties or self.DEFAULT_PROPERTIES
         self.default_output_format = output_format or self.DEFAULT_OUTPUT_FORMAT
 
-    def _request(self, buf, properties, date):
+    def _request(self, buf, properties, date=None):
         """Send a request to the CoreNLP server.
 
         :param (str | unicode) text: raw text for the CoreNLPServer to parse
@@ -188,8 +188,13 @@ class CoreNLPClient(RobustService):
             else:
                 raise ValueError("Unrecognized inputFormat " + input_format)
 
+            if date:
+                params = {'properties': str(properties),'date': str(date)}
+            else:
+                params = {'properties': str(properties)}
+
             r = requests.post(self.endpoint,
-                              params={'properties': str(properties),'date': str(date)},
+                              params=params,
                               data=buf, headers={'content-type': ctype},
                               timeout=(self.timeout*2)/1000)
             r.raise_for_status()
