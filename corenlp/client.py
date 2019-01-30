@@ -9,6 +9,7 @@ import shlex
 import subprocess
 import time
 import sys
+import datetime
 
 from six.moves.urllib.parse import urlparse
 
@@ -168,11 +169,12 @@ class CoreNLPClient(RobustService):
         self.default_properties = properties or self.DEFAULT_PROPERTIES
         self.default_output_format = output_format or self.DEFAULT_OUTPUT_FORMAT
 
-    def _request(self, buf, properties):
+    def _request(self, buf, properties, date=None):
         """Send a request to the CoreNLP server.
 
         :param (str | unicode) text: raw text for the CoreNLPServer to parse
         :param (dict) properties: properties that the server expects
+        :param (str) date: reference date of document, used by server to set docDate - expects YYYY-MM-DD
         :return: request result
         """
         self.ensure_alive()
@@ -186,8 +188,13 @@ class CoreNLPClient(RobustService):
             else:
                 raise ValueError("Unrecognized inputFormat " + input_format)
 
+            if date:
+                params = {'properties': str(properties),'date': str(date)}
+            else:
+                params = {'properties': str(properties)}
+
             r = requests.post(self.endpoint,
-                              params={'properties': str(properties)},
+                              params=params,
                               data=buf, headers={'content-type': ctype},
                               timeout=(self.timeout*2)/1000)
             r.raise_for_status()
@@ -198,7 +205,7 @@ class CoreNLPClient(RobustService):
             else:
                 raise AnnotationException(r.text)
 
-    def annotate(self, text, annotators=None, output_format=None, properties=None):
+    def annotate(self, text, annotators=None, output_format=None, properties=None, date=None):
         """Send a request to the CoreNLP server.
 
         :param (str | unicode) text: raw text for the CoreNLPServer to parse
@@ -222,7 +229,7 @@ class CoreNLPClient(RobustService):
         if output_format is not None:
             properties["outputFormat"] = output_format
         # make the request
-        r = self._request(text.encode('utf-8'), properties)
+        r = self._request(text.encode('utf-8'), properties, date)
         # customize what is returned based outputFormat
         if properties["outputFormat"] == "serialized":
             doc = Document()
@@ -235,7 +242,7 @@ class CoreNLPClient(RobustService):
         else:
             return r
 
-    def update(self, doc, annotators=None, properties=None):
+    def update(self, doc, annotators=None, properties=None, date=None):
         if properties is None:
             properties = self.default_properties
             properties.update({
@@ -248,7 +255,7 @@ class CoreNLPClient(RobustService):
             writeToDelimitedString(doc, stream)
             msg = stream.getvalue()
 
-        r = self._request(msg, properties)
+        r = self._request(msg, properties, date)
         doc = Document()
         parseFromDelimitedString(doc, r.content)
         return doc
