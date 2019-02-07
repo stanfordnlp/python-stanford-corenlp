@@ -1,6 +1,9 @@
 Stanford CoreNLP Python Interface
 =================================
 
+**NOTE:** This package is now deprecated. Please use the `stanfordnlp <https://github.com/stanfordnlp/stanfordnlp>`_ package instead.
+
+
 .. image:: https://travis-ci.org/stanfordnlp/python-stanford-corenlp.svg?branch=master
     :target: https://travis-ci.org/stanfordnlp/python-stanford-corenlp
 
