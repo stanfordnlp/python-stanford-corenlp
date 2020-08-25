@@ -1,7 +1,7 @@
 Stanford CoreNLP Python Interface
 =================================
 
-**NOTE:** This package is now deprecated. Please use the `stanfordnlp <https://github.com/stanfordnlp/stanza>`_ package instead.
+**NOTE:** This package is now deprecated. Please use the `stanza <https://github.com/stanfordnlp/stanza>`_ package instead.
 
 
 .. image:: https://travis-ci.org/stanfordnlp/python-stanford-corenlp.svg?branch=master
